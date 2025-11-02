@@ -1,49 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Dashboard - EchoVault</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoVault - User Dashboard</title>
+  <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
-  <h1>User Login</h1>
+  <!-- Login Section -->
+  <section id="loginSection" class="login-section" style="display: none;">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <h1>EchoVault</h1>
+          <p>Connect and share with others</p>
+        </div>
 
-  <form id="userLoginForm">
-    <input type="email" id="userEmail" placeholder="Email" required /><br>
-    <input type="password" id="userPassword" placeholder="Password" required /><br>
-    <button type="submit">Login</button>
-  </form>
+        <!-- Alerts Container -->
+        <div id="alertsContainer"></div>
 
-  <div id="userSection" style="display:none;">
-    <h2>Welcome User</h2>
-    <p>You are logged in!</p>
+        <!-- Login Form -->
+        <form id="loginForm" class="auth-form">
+          <h2>Login to Your Account</h2>
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-control" required>
+          </div>
+          <button type="button" id="loginBtn" class="btn btn-primary btn-block" onclick="dashboard.login()">
+            Login
+          </button>
+          <div class="auth-footer">
+            <p>Don't have an account?
+              <a href="#" onclick="switchToRegister(); return false;">Register here</a>
+            </p>
+          </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" class="auth-form" style="display: none;">
+          <h2>Create Your Account</h2>
+          <div class="form-group">
+            <label for="registerName">Full Name</label>
+            <input type="text" id="registerName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="registerEmail">Email Address</label>
+            <input type="email" id="registerEmail" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" class="form-control" required>
+            <small>Must be at least 6 characters long</small>
+          </div>
+          <button type="button" id="registerBtn" class="btn btn-primary btn-block" onclick="dashboard.register()">
+            Register
+          </button>
+          <div class="auth-footer">
+            <p>Already have an account?
+              <a href="#" onclick="switchToLogin(); return false;">Login here</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard Section -->
+  <section id="dashboardSection" class="dashboard-section" style="display: none;">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <a href="#" class="logo">EchoVault</a>
+
+        <div class="header-right">
+          <div class="profile-dropdown">
+            <button id="profileIcon" class="profile-icon">U</button>
+
+            <div id="profileDropdown" class="dropdown-menu">
+              <div class="dropdown-header">
+                <h4 id="profileDisplayName">User Name</h4>
+                <p id="profileDisplayEmail">user@example.com</p>
+              </div>
+
+              <a href="#" class="dropdown-item" onclick="dashboard.openProfileModal(); return false;">
+                👤 Edit Profile
+              </a>
+
+              <div class="dropdown-divider"></div>
+
+              <button class="dropdown-item" id="logoutBtn">
+                🚪 Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+      <!-- Alerts Container -->
+      <div id="alertsContainer"></div>
+
+      <!-- Create Post Box -->
+      <div class="create-post-box">
+        <h3>Create a Post</h3>
+        <form id="createPostForm">
+          <div class="form-group">
+            <label for="postTitle">Title</label>
+            <input
+              type="text"
+              id="postTitle"
+              class="form-control"
+              placeholder="What's on your mind?"
+              maxlength="200"
+              required
+            >
+            <small>3-200 characters</small>
+          </div>
+
+          <div class="form-group">
+            <label for="postContent">Content</label>
+            <textarea
+              id="postContent"
+              class="form-control"
+              placeholder="Share your thoughts with the community..."
+              maxlength="5000"
+              required
+            ></textarea>
+            <small>10-5000 characters</small>
+          </div>
+
+          <button type="submit" id="createPostBtn" class="btn btn-primary">
+            Create Post
+          </button>
+        </form>
+      </div>
+
+      <!-- Posts Feed -->
+      <div class="posts-feed">
+        <div class="posts-header">
+          <h3>Recent Posts</h3>
+        </div>
+
+        <div id="postsContainer">
+          <!-- Posts will be dynamically loaded here -->
+        </div>
+
+        <div id="postsLoading" class="loading" style="display: none;">
+          <div class="loading-spinner"></div>
+          <p>Loading more posts...</p>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Profile</h3>
+        <button id="closeProfileModal" class="modal-close">&times;</button>
+      </div>
+
+      <form id="profileForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="profileName">Name</label>
+            <input type="text" id="profileName" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="profileEmail">Email</label>
+            <input type="email" id="profileEmail" class="form-control" readonly>
+            <small>Email cannot be changed</small>
+          </div>
+
+          <div class="form-group">
+            <label for="profileBio">Bio</label>
+            <textarea
+              id="profileBio"
+              class="form-control"
+              placeholder="Tell us about yourself..."
+              maxlength="300"
+            ></textarea>
+            <small>Maximum 300 characters</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="dashboard.closeProfileModal()">
+            Cancel
+          </button>
+          <button type="submit" id="saveProfileBtn" class="btn btn-primary">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <script>
-    document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("userEmail").value;
-      const password = document.getElementById("userPassword").value;
-
-      try {
-        const res = await fetch("http://localhost:5000/api/users/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          alert("✅ Login successful!");
-          document.getElementById("userLoginForm").style.display = "none";
-          document.getElementById("userSection").style.display = "block";
-        } else {
-          alert("❌ " + data.message);
-        }
-      } catch (err) {
-        alert("⚠️ Error connecting to server");
-      }
-    });
-  </script>
+  <script src="js/dashboard.js"></script>
 </body>
 </html>
