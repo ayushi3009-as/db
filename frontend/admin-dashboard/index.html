@@ -1,59 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard - EchoVault</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoVault - Admin Dashboard</title>
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-  <h1>Admin Login</h1>
+  <!-- Login Section -->
+  <section id="loginSection" class="login-section" style="display: none;">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <h1>EchoVault Admin</h1>
+          <p>Administrative Control Panel</p>
+        </div>
 
-  <form id="adminLoginForm">
-    <input type="email" id="adminEmail" placeholder="Email" required /><br>
-    <input type="password" id="adminPassword" placeholder="Password" required /><br>
-    <button type="submit">Login</button>
-  </form>
+        <!-- Alerts Container -->
+        <div id="alertsContainer"></div>
 
-  <div id="adminSection" style="display:none;">
-    <h2>Welcome Admin</h2>
-    <button id="loadUsers">Load All Users</button>
-    <div id="usersList"></div>
+        <form id="adminLoginForm" class="auth-form">
+          <h2>Admin Login</h2>
+          <div class="form-group">
+            <label for="adminEmail">Email Address</label>
+            <input type="email" id="adminEmail" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Password</label>
+            <input type="password" id="adminPassword" class="form-control" required>
+          </div>
+          <button type="submit" id="adminLoginBtn" class="btn btn-primary btn-block">
+            Login as Admin
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Admin Dashboard Section -->
+  <section id="adminSection" class="admin-section" style="display: none;">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header-content">
+        <a href="#" class="admin-logo">EchoVault Admin</a>
+
+        <div class="admin-header-right">
+          <div class="admin-welcome">
+            Welcome, <strong id="adminName">Admin</strong>
+          </div>
+          <button id="logoutBtn" class="btn btn-secondary btn-sm">
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-container">
+      <!-- Alerts Container -->
+      <div id="alertsContainer"></div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button id="refreshDataBtn" class="btn btn-primary">
+          🔄 Refresh Data
+        </button>
+        <button id="createAdminBtn" class="btn btn-success">
+          👤 Create Admin User
+        </button>
+        <button class="btn btn-warning">
+          📊 Export Reports
+        </button>
+        <button class="btn btn-info">
+          📧 Send Announcement
+        </button>
+      </div>
+
+      <!-- Statistics Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="totalUsers">0</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="activeToday">0</div>
+          <div class="stat-label">Active Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalPosts">0</div>
+          <div class="stat-label">Total Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="postsToday">0</div>
+          <div class="stat-label">Posts Today</div>
+        </div>
+      </div>
+
+      <!-- Management Grid -->
+      <div class="management-grid">
+        <!-- User Management -->
+        <div class="management-card">
+          <div class="card-header">
+            <h3>User Management</h3>
+            <div class="search-box">
+              <input
+                type="text"
+                id="userSearch"
+                class="search-input"
+                placeholder="Search users..."
+              >
+              <select id="userStatusFilter" class="form-control" style="width: auto;">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Avatar</th>
+                    <th>Name & Email</th>
+                    <th>Status</th>
+                    <th>Activity</th>
+                    <th>Posts</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr>
+                    <td colspan="6" class="text-center">
+                      <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading users...</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post Management -->
+        <div class="management-card">
+          <div class="card-header">
+            <h3>Post Management</h3>
+            <div class="search-box">
+              <input
+                type="text"
+                id="postSearch"
+                class="search-input"
+                placeholder="Search posts..."
+              >
+              <select id="postStatusFilter" class="form-control" style="width: auto;">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="deleted">Deleted</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Title & Content</th>
+                    <th>Author</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Engagement</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="postsTableBody">
+                  <tr>
+                    <td colspan="6" class="text-center">
+                      <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading posts...</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- Create Admin Modal -->
+  <div id="createAdminModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Create New Admin User</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <form id="createAdminForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="newAdminName">Full Name</label>
+            <input type="text" id="newAdminName" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newAdminEmail">Email Address</label>
+            <input type="email" id="newAdminEmail" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newAdminPassword">Password</label>
+            <input type="password" id="newAdminPassword" class="form-control" required>
+            <small>Must be at least 6 characters long</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+          <button type="submit" id="createAdminSubmitBtn" class="btn btn-success">
+            Create Admin
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <script>
-    document.getElementById("adminLoginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("adminEmail").value;
-      const password = document.getElementById("adminPassword").value;
+  <!-- User Details Modal -->
+  <div id="userDetailsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>User Details</h3>
+        <button class="modal-close">&times;</button>
+      </div>
 
-      try {
-        const res = await fetch("http://localhost:5000/api/admin/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name</label>
+          <p id="detailUserName" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
 
-        const data = await res.json();
-        if (res.ok) {
-          alert("✅ Login successful!");
-          document.getElementById("adminLoginForm").style.display = "none";
-          document.getElementById("adminSection").style.display = "block";
-        } else {
-          alert("❌ " + data.message);
-        }
-      } catch (err) {
-        alert("⚠️ Error connecting to server");
-      }
-    });
+        <div class="form-group">
+          <label>Email</label>
+          <p id="detailUserEmail" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
 
-    // Load users on button click
-    document.getElementById("loadUsers").addEventListener("click", async () => {
-      const res = await fetch("http://localhost:5000/api/admin/users");
-      const users = await res.json();
-      document.getElementById("usersList").innerHTML = users
-        .map(u => `<p>${u.name} - ${u.email}</p>`)
-        .join("");
-    });
-  </script>
+        <div class="form-group">
+          <label>Role</label>
+          <p id="detailUserRole" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+          <p id="detailUserStatus" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Joined Date</label>
+          <p id="detailUserJoined" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Last Login</label>
+          <p id="detailUserLastLogin" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Total Posts</label>
+          <p id="detailUserPosts" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Bio</label>
+          <p id="detailUserBio" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toggle User Modal -->
+  <div id="toggleUserModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Toggle User Status</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p>Are you sure you want to toggle this user's active status?</p>
+        <p><strong>This will prevent the user from logging in if deactivated.</strong></p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-cancel">Cancel</button>
+        <button id="confirmToggleUserBtn" class="btn btn-warning">
+          Toggle Status
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete User Modal -->
+  <div id="deleteUserModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Delete User</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p><strong>⚠️ Warning: This action cannot be undone!</strong></p>
+        <p>Deleting this user will:</p>
+        <ul>
+          <li>Deactivate their account</li>
+          <li>Delete all their posts</li>
+          <li>Remove their access to the platform</li>
+        </ul>
+        <p>Are you sure you want to proceed?</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-cancel">Cancel</button>
+        <button id="confirmDeleteUserBtn" class="btn btn-danger">
+          Delete User
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post Details Modal -->
+  <div id="postDetailsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Post Details</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Title</label>
+          <p id="detailPostTitle" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Content</label>
+          <p id="detailPostContent" class="form-control" style="background: #f8f9fa; min-height: 100px;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Author</label>
+          <p id="detailPostAuthor" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Created At</label>
+          <p id="detailPostCreated" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+          <p id="detailPostStatus" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Likes</label>
+          <p id="detailPostLikes" class="form-control" style="background: #f8f9fa;"></p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
 </body>
 </html>
