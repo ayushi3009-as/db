@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EchoVault | Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <h1>🌙 EchoVault</h1>
+      <div class="profile-icon" id="profileIcon">U</div>
+    </div>
+
+    <!-- Welcome Section -->
+    <div style="margin: 20px 0;">
+      <h2 id="welcomeMsg">Welcome, User</h2>
+      <p id="userEmail" style="color: #ccc;"></p>
+    </div>
+
+    <!-- Create Memory -->
+    <div class="container" style="margin: 20px 0;">
+      <h2>💭 Create Memory</h2>
+      <form id="memoryForm">
+        <input type="text" id="memoryTitle" placeholder="Memory Title" required />
+        <textarea id="memoryContent" placeholder="Write your memory..." rows="4" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; font-family: 'Poppins', sans-serif; resize: vertical;" required></textarea>
+        <button type="submit">Post Memory</button>
+      </form>
+    </div>
+
+    <!-- Your Memories Feed -->
+    <div>
+      <h2>📚 Your Memories</h2>
+      <div id="memoriesFeed"></div>
+    </div>
+
+    <!-- Logout Button -->
+    <button onclick="logout()" style="margin-top: 20px; background: #e74c3c;">Logout</button>
+  </div>
+
+  <script>
+    // Get user info from localStorage
+    const userName = localStorage.getItem('name') || 'User';
+    const userEmail = localStorage.getItem('email') || '';
+    
+    // Display user info
+    document.getElementById('welcomeMsg').textContent = `Welcome, ${userName}`;
+    document.getElementById('userEmail').textContent = userEmail;
+    document.getElementById('profileIcon').textContent = userName.charAt(0).toUpperCase();
+
+    // Load memories on page load
+    loadMemories();
+
+    // Create Memory Form Submit
+    document.getElementById('memoryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const title = document.getElementById('memoryTitle').value;
+      const content = document.getElementById('memoryContent').value;
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/memories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userEmail: userEmail,
+            userName: userName,
+            title: title,
+            content: content
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert('✅ Memory created!');
+          document.getElementById('memoryForm').reset();
+          loadMemories(); // Reload memories
+        } else {
+          alert('❌ ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Failed to create memory');
+      }
+    });
+
+    // Load Memories Function
+    async function loadMemories() {
+      try {
+        const response = await fetch(`http://localhost:5000/api/memories?email=${userEmail}`);
+        const data = await response.json();
+        
+        const feed = document.getElementById('memoriesFeed');
+        
+        if (data.memories && data.memories.length > 0) {
+          feed.innerHTML = data.memories.map(memory => `
+            <div class="post">
+              <h3 style="color: #00e6b8; margin-bottom: 10px;">${memory.title}</h3>
+              <p style="margin-bottom: 10px;">${memory.content}</p>
+              <small style="color: #999;">Posted on ${new Date(memory.createdAt).toLocaleDateString()}</small>
+            </div>
+          `).join('');
+        } else {
+          feed.innerHTML = '<p style="color: #999;">No memories yet. Create your first memory!</p>';
+        }
+      } catch (error) {
+        console.error('Error loading memories:', error);
+        document.getElementById('memoriesFeed').innerHTML = '<p style="color: #e74c3c;">Failed to load memories</p>';
+      }
+    }
+
+    // Logout Function
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EchoVault | Login</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>🔐 EchoVault</h1>
+    <h2>Login to continue</h2>
+
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Enter your email" required />
+      <input type="password" id="password" placeholder="Enter your password" required />
+
+      <select id="role" required>
+        <option value="">Select Role</option>
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <p>Don't have an account? <a href="register.html">Register here</a></p>
+
+    <!-- Admin Credentials Info -->
+   
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      
+      console.log('Login attempt:', { email, role });
+      
+      // ✅ FRONTEND VALIDATION: Check admin credentials match
+      if (role === 'admin') {
+        if (email !== 'admin@echovault.com' || password !== 'admin123') {
+          alert('❌ Invalid admin credentials!\n\nAdmin Login:\nEmail: admin@echovault.com\nPassword: admin123');
+          return;
+        }
+      }
+      
+      // ✅ FRONTEND VALIDATION: Check user is not using admin email
+      if (role === 'user' && email === 'admin@echovault.com') {
+        alert('❌ This email is reserved for admin. Please select Admin role or use a different email.');
+        return;
+      }
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role })
+        });
+        
+        const data = await response.json();
+        console.log('Server response:', data);
+        
+        if (response.ok) {
+          // ✅ DOUBLE CHECK: Verify returned role matches selected role
+          if (data.user.role && data.user.role !== role) {
+            alert('❌ Role mismatch! Please select the correct role.');
+            return;
+          }
+          
+          alert('✅ ' + data.message);
+          
+          // Store user info with role verification
+          localStorage.setItem('name', data.user.name);
+          localStorage.setItem('email', data.user.email);
+          localStorage.setItem('role', role);
+          localStorage.setItem('isAdmin', role === 'admin' ? 'true' : 'false');
+          
+          // Redirect based on role
+          if (role === 'admin') {
+            window.location.href = 'adminDashboard.html';
+          } else {
+            window.location.href = 'userdashboard.html';
+          }
+        } else {
+          alert('❌ ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Cannot connect to server!');
+      }
+    });
+  </script>
+</body>
+</html>

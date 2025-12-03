@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EchoVault | Register</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>🌙 EchoVault</h1>
+    <h2>Create your account</h2>
+
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="Enter your name" required />
+      <input type="email" id="email" placeholder="Enter your email" required />
+      <input type="password" id="password" placeholder="Enter your password" required />
+      
+      <button type="submit">Register</button>
+    </form>
+
+    <p>Already have an account? <a href="index.html">Login here</a></p>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      console.log('Registering:', { name, email });
+      
+      try {
+        // CHANGED TO PORT 5000
+        const response = await fetch('http://localhost:5000/api/users/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        
+        const data = await response.json();
+        console.log('Server response:', data);
+        
+        if (response.ok) {
+          alert('Registration successful! You can now login.');
+          window.location.href = 'index.html';
+        } else {
+          alert('' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Cannot connect to server! Make sure backend is running on port 5000');
+      }
+    });
+  </script>
+</body>
+</html>
